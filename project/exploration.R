@@ -5,6 +5,8 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 rates <- read.csv(file = file.path("data", "rates2016.csv"), header = T, stringsAsFactors = F)
 benefits <- read.csv(file = file.path("data", "benefits2016.csv"), header = T, stringsAsFactors = F)
 networks <- read.csv(file = file.path("data", "networks2016.csv"), header = T, stringsAsFactors = F)
+plans <- read.csv(file = file.path("data", "PlanAttributes.csv"), header = T, stringsAsFactors = F)
+plans <- plans[plans$BusinessYear == "2016", ]
 
 
 summary(rates)
@@ -25,4 +27,8 @@ head(networks$NetworkId, 50)
 paste("Networks:", length(unique(networks$NetworkId)), "different network (ids)")
 paste("Networks:", length(networks$NetworkId), "number of networks in dataset (why doubles)")
 
+
+summary(plans)
+head(plans$PlanId, 50)
+head(plans$NetworkId, 50)
 
