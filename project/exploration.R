@@ -1,7 +1,6 @@
 # Data exploration Scripts and first Visualisations
 
 # Set working directory to current file location (requires Rstudio as an IDE)
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 rates <- read.csv(file = file.path("data", "rates2016.csv"), header = T, stringsAsFactors = F)
 benefits <- read.csv(file = file.path("data", "benefits2016.csv"), header = T, stringsAsFactors = F)
 networks <- read.csv(file = file.path("data", "networks2016.csv"), header = T, stringsAsFactors = F)
@@ -42,7 +41,6 @@ head(plans$NetworkId, 50)
 head(plans$IssuerId, 50)
 head(plans$BenefitPackageId, 50)
 head(plans$StandardComponentId, 50)
-head(plans$, 50)
 paste("Plans:", length(unique(plans$PlanId)), "different plans")
 paste("Plans:", length(unique(plans$StandardComponentId)), "different (standard component) plans")
 paste("Plans:", length(unique(plans$NetworkId)), "number of networks associated")
