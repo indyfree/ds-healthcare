@@ -16,15 +16,23 @@ get_state_features <- function(planes, rates, benefits) {
   # 3. Find Amount and Ratio of Plans that cover Abortion
   states <- find_state_coverage(plans, abortion_plans) 
   
-  # 5. Compute Additional Features: Mean Rates, extra pay
+  # 4. Compute Additional Features: Mean Rates, Extra pay
   states <- merge(states, compute_rates(rates, abortion_plans), by='State', all.x=T)
   
-  # 7. TODO: Compute Mean Copay for benefits
+  # 5. Compute Mean CoPays and CoIns of abortion benefits
+  states <- merge(states, compute_copays(abortion_benefits), by='State', all.x=T)
   
   # 8. TODO: Mean MOOP for abortion plans
   #abortion_plans <- abortion_plans[,'StateCode', 'MOOP']
   
   return(states)
+}
+
+compute_copays <- function(abortion_benefits) {
+  mean_copays <- aggregate(abortion_benefits, list(abortion_benefits$StateCode), FUN = mean)
+  mean_copays <- mean_copays[c('Group.1', 'Coins', 'Copay')] #Eventually extend to include more features
+  colnames(mean_copays) <- c('State', 'MeanCoins', 'MeanCopay')
+  return(mean_copays)
 }
 
 find_state_coverage <- function(all_plans, abortion_planes) {
@@ -93,12 +101,7 @@ get_abortion_benefits <- function(benefits) {
   abortion_benefits$CoinsOutofNet[is.na(abortion_benefits$CoinsOutofNet)] <- 0
   abortion_benefits$Copay[is.na(abortion_benefits$Copay)] <- 0
   
-  abortion_benefits <- abortion_benefits[c('PlanId', 'Coins', 'CoinsAfterDeduct', 'CoinsOutofNet', 'Copay', 'CopayAfterDeduct', 'IsExclFromOonMOOP', 'QuantLimitOnSvc')]
+  abortion_benefits <- abortion_benefits[c('PlanId', 'StateCode', 'Coins', 'CoinsAfterDeduct', 'CoinsOutofNet', 'Copay', 'CopayAfterDeduct', 'IsExclFromOonMOOP', 'QuantLimitOnSvc')]
   
   return(abortion_benefits)
 }
-
-# ggplot(abortion_plans, aes(x = abortion_plans$moop)) + geom_histogram()
-# 
-# ggplot(data=d, aes(x=State, y=ExtraPay, fill=factor(Color))) +
-#   geom_bar(stat="identity", position=position_dodge())
