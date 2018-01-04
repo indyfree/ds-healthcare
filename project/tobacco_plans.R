@@ -58,7 +58,7 @@ states$PercentageAbortionPlans <- states$NumAbortionPlans/num_total_plans$NumPla
 # 4. Merge political orientation (Label)
 states <- merge(states, pol, by = 'State')
 states$Color <- as.factor(states$Color)
-ggplot(data=states, aes(x=State, y=NumAbortionPlans, fill=factor(Color))) +
+ggplot(data=states, aes(x=State, y=PercentageAbortionPlans, fill=factor(Color))) +
   geom_bar(stat="identity", position=position_dodge())
 
 # 5. Compute Mean Rates for Abortion Plans
