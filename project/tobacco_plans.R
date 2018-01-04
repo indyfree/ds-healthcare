@@ -1,4 +1,5 @@
 library('ggplot2') # visualization
+library('dplyr') # data manipulation
 
 benefits <- read.csv(file = file.path("data", "benefits2016.csv"), header = T, na.strings = c("", " ", NA), stringsAsFactors = F)
 plans <- read.csv(file = file.path("data", "PlanAttributes.csv"), header = T, na.strings = c("", " ", NA), stringsAsFactors = F)
@@ -37,12 +38,16 @@ abortion_benefits$Coins[is.na(abortion_benefits$Coins)] <- 0
 abortion_benefits$CoinsOutofNet[is.na(abortion_benefits$CoinsOutofNet)] <- 0
 abortion_benefits$Copay[is.na(abortion_benefits$Copay)] <- 0
 
-# 2. Find plans that cover these benefits
+# 2. Find plans that cover these Abortion Benefits per State
 abortion_plans <- subset(plans, plans$PlanId %in% abortion_benefits$PlanId)
 
-# 3. Count Abortion Plans per State
-states <- aggregate(abortion_plans$PlanId, list(abortion_plans$StateCode), length)
-colnames(states) <- c('State', 'NumAbortionPlans')
+covered_states <- aggregate(abortion_plans$PlanId, list(abortion_plans$StateCode), length)
+colnames(covered_states) <- c('State', 'NumAbortionPlans')
+not_covered <- unique(plans$StateCode)[!(unique(plans$StateCode) %in% covered_states$State)]
+not_covered <- data.frame(not_covered, 0)
+colnames(not_covered) <- c('State', 'NumAbortionPlans')
+states <- rbind(covered_states, not_covered)
+states <- arrange(states, State)
 
 # 4. Find Ratio of Plans that cover Abortion
 num_total_plans <- aggregate(plans$PlanId, list(plans$StateCode), length)
@@ -52,8 +57,9 @@ states$PercentageAbortionPlans <- states$NumAbortionPlans/num_total_plans$NumPla
 
 # 4. Merge political orientation (Label)
 states <- merge(states, pol, by = 'State')
-# ggplot(data=d, aes(x=State, y=Ratio, fill=factor(Color))) +
-#   geom_bar(stat="identity", position=position_dodge())
+states$Color <- as.factor(states$Color)
+ggplot(data=states, aes(x=State, y=NumAbortionPlans, fill=factor(Color))) +
+  geom_bar(stat="identity", position=position_dodge())
 
 # 5. Compute Mean Rates for Abortion Plans
 abortion_rates <- subset(rates, rates$PlanId %in% abortion_plans$StandardComponentId)
