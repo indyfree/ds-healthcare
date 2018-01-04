@@ -11,13 +11,12 @@ pol <- read.csv(file = file.path("data", "political_orientation.csv"), header = 
 abortion_benefits <- subset(benefits, grepl("Abortion for Which Public", benefits$BenefitName)) 
 abortion_benefits <- subset(abortion_benefits, abortion_benefits$IsCovered == 'Covered') # Only select benefits that cover Abortion
 
-# Select Interesting Features: Tier2 only exist when Tier1 exsits
-features <- c("PlanId", "CoinsInnTier1", "CoinsOutofNet", "CopayInnTier1", "CopayOutofNet",  "IsExclFromOonMOOP", "QuantLimitOnSvc")
+# Select Interesting Features to look at
+features <- c("PlanId", "CoinsInnTier1", "CoinsOutofNet", "CopayInnTier1", "IsExclFromOonMOOP", "QuantLimitOnSvc")
 abortion_benefits <- abortion_benefits[,features]
 # Factorize categorical columns
 categorical_cols <- sapply(abortion_benefits, is.character)
 abortion_benefits[,categorical_cols] <- lapply(abortion_benefits[categorical_cols], factor)
-
 
 # Convert to machine readible numbers
 abortion_benefits$CoinsAfterDeduct <- grepl("after deduct", abortion_benefits$CoinsInnTier1)
@@ -27,10 +26,16 @@ abortion_benefits$Coins <- as.numeric(abortion_benefits$Coins)/100
 abortion_benefits$CoinsOutofNet <- gsub('% Coins.*', '', abortion_benefits$CoinsOutofNet)
 abortion_benefits$CoinsOutofNet <- as.numeric(abortion_benefits$CoinsOutofNet)/100
 
+abortion_benefits$CopayAfterDeduct <- grepl("after deduct", abortion_benefits$CopayInnTier1)
+abortion_benefits$Copay <- gsub(' Copay.*', '', abortion_benefits$CopayInnTier1)
+abortion_benefits$Copay <- gsub('\\$', '', abortion_benefits$Copay)
+abortion_benefits$Copay <- as.numeric(abortion_benefits$Copay)
+
 # Fill in Missing Values
 abortion_benefits$QuantLimitOnSvc[is.na(abortion_benefits$QuantLimitOnSvc)] <- 'No'
 abortion_benefits$Coins[is.na(abortion_benefits$Coins)] <- 0
 abortion_benefits$CoinsOutofNet[is.na(abortion_benefits$CoinsOutofNet)] <- 0
+abortion_benefits$Copay[is.na(abortion_benefits$Copay)] <- 0
 
 # 2. Find plans that cover these benefits
 abortion_plans <- subset(plans, plans$PlanId %in% abortion_benefits$PlanId)
