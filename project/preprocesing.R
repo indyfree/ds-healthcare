@@ -22,6 +22,9 @@ get_state_features <- function(planes, rates, benefits) {
   # 5. Compute Mean CoPays and CoIns of abortion benefits
   states <- merge(states, compute_copays(abortion_benefits), by='State', all.x=T)
   
+  # 6. Fill Missing Values with 0 (States who dont have coverage)
+  states[is.na(states)] <- 0
+  
   # 8. TODO: Mean MOOP for abortion plans
   #abortion_plans <- abortion_plans[,'StateCode', 'MOOP']
   
@@ -35,7 +38,7 @@ compute_copays <- function(abortion_benefits) {
   return(mean_copays)
 }
 
-find_state_coverage <- function(all_plans, abortion_planes) {
+find_state_coverage <- function(all_plans, abortion_plans) {
   covered_states <- aggregate(abortion_plans$PlanId, list(abortion_plans$StateCode), length)
   colnames(covered_states) <- c('State', 'NumAbortionPlans')
   not_covered <- unique(plans$StateCode)[!(unique(plans$StateCode) %in% covered_states$State)]
