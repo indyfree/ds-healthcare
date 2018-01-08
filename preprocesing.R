@@ -1,4 +1,3 @@
-library('ggplot2') # visualization
 library('dplyr') # data manipulation
 
 #
