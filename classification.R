@@ -1,39 +1,32 @@
 library("e1071")
 
-source ('./dataLoader.R')
+#source ('./dataLoader.R')
 source('./preprocesing.R')
 
-states <- get_state_features(plans, rates, benefits)
+# Prepare data and Label
+states2015 <- get_state_features(plans2015, rates2015, benefits2015)
+states2016 <- get_state_features(plans2016, rates2016, benefits2016)
+states <- rbind(states2015, states2016)
 
-# 4. Merge political orientation (Label)
-states <- merge(states, pol, by = 'State')
+states <- merge(states, pol2012, by = 'State')
 states$Color <- as.factor(states$Color)
 
-# 5. Shuffle Data and split into training and testing
-states <-states[sample(nrow(states)),]
-train <- states[1:(nrow(states)/2),]
-test <- states[(nrow(states)/2):nrow(states),]
+# Select Features
+feat_list <- c('PercentageAbortionPlans', 'ExtraPay', 'MeanCopay')
+states <- states[c(feat_list, 'Color')]
 
-# 6. Train Classifier
-features <- train[c('PercentageAbortionPlans', 'ExtraPay')]
-target <- train$Color
-svm <- trainSVM(features, target)
-calcAccuracy(svm, features, target)
-
-# 7. Test Classifier
-features <- test[c('PercentageAbortionPlans', 'ExtraPay')]
-target <- test$Color
-calcAccuracy(svm, features, target)
-
-# Training Functions
-calcAccuracy <- function(model, features, target) {
-  prediction <- predict(model, features, scale = F)
-  print(prediction)
-  cm <- table(prediction,target)
-  return(sum(diag(cm))/sum(cm))
+# Perform Classification and Cross Validation
+source('./k_fold.R')
+set.seed(47)
+test_acc <- c()
+for (i in 1:20) {
+  accs <- performKFold(3, states)
+  test_acc <- c(test_acc, mean(accs$testing))
+  #print(mean(accs$testing))
 }
+print(mean(test_acc))
 
-trainSVM <- function(features, target, gamma = (1/ncol(features)), cost = 1) {
-  model <- svm(features, target, gamma = gamma, cost = cost, scale=F, type='C')
-  return(model)
-}
+# Perform Logistical Regression to validate results
+logit <- glm(Color~., family = binomial(link = logit), data = states)
+summary(logit)
+
