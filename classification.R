@@ -1,11 +1,8 @@
 library("e1071")
 
-benefits <- read.csv(file = file.path("data", "benefits2016.csv"), header = T, na.strings = c("", " ", NA), stringsAsFactors = F)
-plans <- read.csv(file = file.path("data", "PlanAttributes.csv"), header = T, na.strings = c("", " ", NA), stringsAsFactors = F)
-rates <- read.csv(file = file.path("data", "rates2016.csv"), header = T, na.strings = c("", " ", NA), stringsAsFactors = F)
-pol <- read.csv(file = file.path("data", "political_orientation.csv"), header = T, na.strings = c("", " ", NA), stringsAsFactors = F)
-
+source ('./dataLoader.R')
 source('./preprocesing.R')
+
 states <- get_state_features(plans, rates, benefits)
 
 # 4. Merge political orientation (Label)
