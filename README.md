@@ -1,5 +1,4 @@
 # How is Healthcare related to political Orientation in the U.S.?
-Final Project of Data Science in Practice Class 2017
 ## Requirements
 The following R Packages are required to run the project
 ### Preprocessing and data management
